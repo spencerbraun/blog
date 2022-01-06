@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Demand Forecasting with Bayesian Methods | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Demand Forecasting with Bayesian Methods" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Predicting blood platelet demand using online and GP regression" />
+<meta property="og:description" content="Predicting blood platelet demand using online and GP regression" />
+<link rel="canonical" href="https://spencerbraun.github.io/blog/bayesian/machine-learning/python/statistics/projects/tensorflow/2021/07/22/demand-forecasting-with-bayesian-methods.html" />
+<meta property="og:url" content="https://spencerbraun.github.io/blog/bayesian/machine-learning/python/statistics/projects/tensorflow/2021/07/22/demand-forecasting-with-bayesian-methods.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-22T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Demand Forecasting with Bayesian Methods" />
+<script type="application/ld+json">
+{"url":"https://spencerbraun.github.io/blog/bayesian/machine-learning/python/statistics/projects/tensorflow/2021/07/22/demand-forecasting-with-bayesian-methods.html","@type":"BlogPosting","headline":"Demand Forecasting with Bayesian Methods","dateModified":"2021-07-22T00:00:00-05:00","datePublished":"2021-07-22T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://spencerbraun.github.io/blog/bayesian/machine-learning/python/statistics/projects/tensorflow/2021/07/22/demand-forecasting-with-bayesian-methods.html"},"description":"Predicting blood platelet demand using online and GP regression","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://spencerbraun.github.io/blog/feed.xml" title="fastpages" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=144357836"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '144357836');
+</script>
+
+
+<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About Me</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Demand Forecasting with Bayesian Methods</h1><p class="page-description">Predicting blood platelet demand using online and GP regression</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-07-22T00:00:00-05:00" itemprop="datePublished">
+        Jul 22, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      11 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#bayesian">bayesian</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#machine-learning">machine-learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#statistics">statistics</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#projects">projects</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#tensorflow">tensorflow</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#approaches">Approaches</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#online-regression">Online Regression</a></li>
+<li class="toc-entry toc-h3"><a href="#gaussian-processes-regression">Gaussian Processes Regression</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#experiments">Experiments</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#online-regression-1">Online Regression</a></li>
+<li class="toc-entry toc-h3"><a href="#gaussian-processes-regression-1">Gaussian Processes Regression</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#conclusions">Conclusions</a></li>
+</ul><p>The Stanford Medical system sees a constant stream of patients through its doors every year, many of whom require intensive care. Blood transfusions are a common occurrence as part of a therapy or surgery, but blood platelets are a scarce resource that have a short shelf life. Therefore accurately predicting future demand is essential in order to minimize waste while ensuring hospitals have enough on hand for the current patient population.
+In 2017, Guan et al. published an <a href="https://www.pnas.org/content/114/43/11368">initial model</a> employing a frequentist approach, minimizing waste in a linear program with constraints that took patient features and current stores in account. This model was eventually rolled out into production in an open source R package titled <a href="https://bnaras.github.io/SBCpip/">SBCpip</a> and currently serves the medical system.</p>
+
+<p>I investigated two alternative Bayesian methods to predict demand more transparently: online regression and Gaussian processes regression. Bayesian models offer a number of key advantages over the current system. First, while the linear program approach outputs simple point estimates for the optimal inventory to have on hand, these Bayesian procedures generate a richer posterior distribution that can be used to quantify uncertainty and quantify how the model inputs impact predictions. Second, the data is messy and manually extracted into excel files, leading to duplicates and nonsensical values. The methods explored offer a higher degree of robustness to outliers, which can be tuned by varying the prior distributions. Third, since other hospital systems have similar blood platelet demands, there have been some efforts to generalize SBCpip to other facilities. The Bayesian approaches considered would allow models to lean more heavily on priors before adequate data has been generated and become more customized to each facility over time as data accumulates. Fourth, the linear program approach predicts demand indirectly, making results much harder to interpret. The methods proposed here allow for greater flexibility and transparency in diagnosing issues and determining the underlying drivers of a particular prediction.</p>
+
+<h2 id="approaches">
+<a class="anchor" href="#approaches" aria-hidden="true"><span class="octicon octicon-link"></span></a>Approaches</h2>
+
+<p>While the data cannot be made publicly available, there are a few key features to note. Our outcome variable, blood platelet units used, helps determine the best types of models to use for this problem. The amount used is a real valued number that closely follows a Gaussian curve, permitting the use of a rich class of normally distributed models. The regular fluctuations suggest that some seasonality may be present that could be picked up by a Gaussian process regression model given a suitable kernel. Below I consider some plausible Bayesian models that each have tradeoffs in simplicity, accuracy, and utility.</p>
+
+<h3 id="online-regression">
+<a class="anchor" href="#online-regression" aria-hidden="true"><span class="octicon octicon-link"></span></a>Online Regression</h3>
+
+<p>In a typical Bayesian regression problem, we have a setting with independent and identically distributed training data with future observations drawn from the same population. In this case we can simply place a prior over the weights and variance, evaluate the data likelihood and find the posterior through exact or approximate inference to determine a stable model from which we can make predictions. Here we are presented with a time series of features and inventory data and want our model to flexibly model trends that depend on our time step. Online regression is a naive baseline for this problem in which at time step t, we take the posterior from time step t − 1 as our prior and update the model using only the likelihood over the most recent batch of data. Define our original priors as $p(\theta_0)$, then our model updates occur sequentially:</p>
+
+<p>\begin{align<em>}
+    p(\theta_{t}) = p(\theta_{t} \mid y_{t-1}, x_{t-1},\theta_{t-1}) &amp;\propto p( y_{t-1}\mid x_{t-1},\theta_{t-1})p(\theta_{t-1})<br>
+    p(\theta_{t+1} \mid y_{t}, x_{t},\theta_{t}) &amp;\propto p( y_{t}\mid x_{t},\theta_{t})p(\theta_{t})
+\end{align</em>}</p>
+
+<p>While a simple regression may seem underpowered for this task, it provides an excellent baseline against which we can compare more complex approaches. The conjugacy of the Gaussian model makes it extremely efficient as we add new data points with easy interpretation. However, its failure to model dependency between data points may introduce bias that could be avoided with more complex approaches.</p>
+
+<p>The model as implemented closely follows the approach outlined in Christopher Bishop’s <a href="https://www.amazon.com/Pattern-Recognition-Learning-Information-Statistics/dp/0387310738">Pattern Recognition and Machine Learning</a>. Given model $y_i = w_ix_i^T + \varepsilon_i$, we give likelihood and prior distributions as $p\left(y_{i} \mid x_{i}, w_{i}\right)=\mathcal{N}\left(w_{i} x_{i}^{\top}, \beta^{-1}\right)$ and $p\left(w_{0}\right)=\mathcal{N}\left(m_{0}, S_{0}\right)$ respectively, where $\beta$ is a precision hyperparameter, $m_0 = \mathbf{0}$ and $S_0 = diag(\alpha^{-1})$ for hyperparameter $\alpha$. Our posterior is analytically derived as
+\begin{align<em>}
+    p\left(w_{i+1} \mid w_{i}, x_{i}, y_{i}\right)=\mathcal{N}\left(m_{i+1}, S_{i+1}\right)<br>
+    S_{i+1}=\left(S_{i}^{-1}+\beta x_{i}^{\top} x_{i}\right)^{-1}\ m_{i+1}=S_{i+1}\left(S_{i}^{-1} m_{i}+\beta x_{i} y_{i}\right)
+\end{align</em>}</p>
+
+<p>For model criticism, Bishop recommends evaluating the marginal likelihood, or model evidence, which he derives analytically. For M features and N observations, the log marginal likelihood can be expressed as
+\begin{align<em>}
+    \log p({y} \mid \alpha, \beta)=\frac{M}{2} \log \alpha+\frac{N}{2} \log \beta-E\left({m}_{N}\right)-\frac{1}{2} \log \left|{S}_{N}^{-1}\right|-\frac{N}{2} \log 2 \pi
+\end{align</em>}
+Therefore we can directly use this expression to select for optimal hyperparameters $\alpha,\beta$ to improve the model fit.</p>
+
+<h3 id="gaussian-processes-regression">
+<a class="anchor" href="#gaussian-processes-regression" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gaussian Processes Regression</h3>
+
+<p>I look to Gaussian processes (GP) regression to correct for the deficiencies of the regression model. While the prior model considered datapoints to be independently drawn from a stationary distribution, Gaussian processes explicitly model the covariance relations between time steps. Here we consider our feature vectors $x \in R^d$ over T time steps $x_1,…,x_T$ and each observation of inventory used $y_i = f(x_i)$. If we assume the functions $f$ to be given by a prior Gaussian process $f \sim GP(\mu, K)$ for some mean $\mu$ and covariance matrix $K$ and $y_i \sim N(f(x_i), \sigma^2)$ then we obtain posterior $p\left({f} \mid x_{n}, y_{n}\right) \propto {N}\left({f} \mid {\mu}^{\prime}, {K}^{\prime}\right)$ for ${K}^{\prime}=\left({K}^{-1}+\sigma^{-2} {I}\right)^{-1}, \; {\mu}^{\prime}={K}^{\prime}\left({K}^{-1} {\mu}+\sigma^{-2} {y}\right)$. Similarly, we can obtain an exact posterior predictive distribution given by
+\begin{align<em>}
+    y_{T+1} | x_{T+1}, x_i, y_i &amp;\sim N(m_{T+1}, v_{T+1}) <br>
+    m_{N+1} &amp;=\mu\left({x}_{N+1}\right)+{k}^{\top}\left({K}+\sigma^{2} {I}\right)^{-1}({y}-{\mu}) <br>
+    v_{N+1} &amp;=K\left({x}_{N+1}, {x}_{N+1}\right)-{k}^{\top}\left({K}+\sigma^{2} {I}\right)^{-1} {k}+\sigma^{2}
+\end{align</em>}</p>
+
+<p>GP regression offers additional modeling decisions that improve its attractiveness for our use case. First, there are a variety of potential kernels for expressing the relationship between feature vectors over time. Our choice determines how closely we model regular periodicity and linear trends in the data.</p>
+
+<p>Additionally, since GP regression is closely related to time series methods like ARIMA, we can eschew using features at all and treat the blood inventory as a standalone data series. Why might we prefer this approach? The other regression approaches obtain a posterior predictive distribution by conditioning on $x_{N+i}$ for $i \in [1,7]$, feature vectors which are supposed to contain data like patient counts and other measures that aren’t actually available for future days. While features could be extrapolated from current data, a GP regression approach can condition simply on the time step and avoid some of these messier modeling decisions.</p>
+
+<h2 id="experiments">
+<a class="anchor" href="#experiments" aria-hidden="true"><span class="octicon octicon-link"></span></a>Experiments</h2>
+
+<p>Over the experiments run, the simple online regression obtained the lowest mean absolute error across 1, 3, and 7 day prediction intervals. This result is somewhat surprising given the difference between the modeling assumptions (eg. independence) and the true data generating process but can be reconciled when we consider that we limited GP regression’s performance by limiting the features used in fitting. While online regression achieved the best results under the evaluation metric, GP regression may still be preferable in a practical setting. Comparing the mean absolute error among the methods explored:</p>
+
+<p>\begin{array}{l|cccc}
+    Model &amp; MAE\, 1\, Day &amp; MAE\, 3 \,Day &amp; MAE\, 7 \,Day<br>
+    Online Regression &amp; 6.40 &amp; 6.65 &amp; 6.58 <br>
+    GP Regression &amp; 7.33 &amp; 7.80 &amp; 7.89
+\end{array}</p>
+
+<h3 id="online-regression-1">
+<a class="anchor" href="#online-regression-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Online Regression</h3>
+
+<p>The regressions were tested under two scenarios: for each time period, we could either fit the model using data since inception or look back over a fixed window. The data since inception approach was too constraining and performed slightly worse in evaluations, leading the fixed window approach to be used for comparisons. The model was fit over 7 day increments and produced predictions for 7 days into the future.</p>
+
+<p>We can understand the performance of the model by looking at the results more closely. First, while the online regression approach does not explicitly model a time series, one-hot encoded day of the week features are included as input to the model. Therefore it still can capture some of the cyclicality of blood platelet demand.</p>
+
+<p>The online regression was fit over a grid of potential hyperparameter values for $\alpha, \beta$, with the model with the highest marginal likelihood selected for final predictions. It was sensitive to extreme values of each hyperparameter, but otherwise relatively robust to misspecification within a neighborhood of values.</p>
+
+<h3 id="gaussian-processes-regression-1">
+<a class="anchor" href="#gaussian-processes-regression-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gaussian Processes Regression</h3>
+
+<p>GP regression offers a variety of modeling decisions, but perhaps the most important is the choice of kernel. This decision directly impacts the model’s ability to reflect the true relationship between observations. In <a href="https://www.cs.toronto.edu/~duvenaud/thesis.pdf">“Automatic model construction with Gaussian processes”</a> David Duvenaud outlines a decision process for choosing the best kernel given a dataset. I experimented with permutations of additive kernels, combining Exponential Quadratic, Linear, Periodic, and Locally Periodic varieties. The Locally Periodic kernel was of particular interest as the data shows consistent day of the week seasonality but with magnitudes that vary over time.</p>
+
+<p>The model was fit in <a href="https://www.tensorflow.org/probability">TensorFlow Probability</a> by maximizing the marginal likelihood of the model parameters and the observation noise variance over the training data via gradient descent. The GP regression model was then fit on the data using the optimized kernel before posterior samples were drawn. Over all kernel experiments, a combination kernel of Exponential Quadratic and Locally Periodic varieties produces the best results.</p>
+
+<p><img src="/img/gp_regression.png" alt="Left: Mean and credible intervals drawn from the posterior predictive distribution. Right: sample paths drawn from the posterior predictive distribution."></p>
+
+<p>The model was then fit for periods increasing in 7 day increments from the data series inception, with predictions made for the following 7 day increment. For example at day 100, data from days 0-100 are taken as the training set, with the mean and standard deviation from the posterior predictive distribution forming confidence intervals for the prediction period. Alternatively, samples could be drawn from the posterior predictive distribution to simulate different paths created by the Gaussian process.</p>
+
+<p><img src="/img/gp_kernels.png" alt="Left: Samples drawn from an Exponential Quadratic / Locally Periodic kernel with parameters learned from fewer than 100 datapoints. Middle: The same kernel with parameters learned from all datapoints. Right: First 100 observations of platelets used."></p>
+
+<p>We can make further sense of GP regression’s underperformance by looking at the kernels learned themselves. Comparing kernels fit in the training process along with the true observations, we can see that given little data, the kernel is unable to adapt to the variation in the data. A kernel with parameters trained on the full dataset shows much more reasonable variation, with both global and local trends. However, comparing this kernel to the observed variation, we can see it still has a long way to go to match the ground truth. Additional data would go a long way to improving this method, but there may also be more expressive kernels than those explored that could drastically improve performance.</p>
+
+<p>While the hyperparameter search was partially limited by compute time, GP regression’s results indicate the method could show promise in this application. While it achieved higher error than other methods, its performance could improve if we included additional features, some of which might be known ahead of time by hospital administrators. Additional variance control, such as full marginalization of the model’s hyperparameters, would also increase its effectiveness.</p>
+
+<h2 id="conclusions">
+<a class="anchor" href="#conclusions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusions</h2>
+
+<p>I took a survey approach to understanding the tradeoffs among Bayesian methods for resolving a difficult, real-world problem. Forecasting in general is a daunting task, since it requires extending a model beyond the domain of observations seen. In the medical setting, it is even more crucial to have humans in the loop, and while the original linear program could set hard boundaries on the predictions produced, it is more useful to ensure that end users have an intuitive understanding of the results produced and the tools to probe alternative outcomes.</p>
+
+<p>The Bayesian methods explored each had significant problems in completely satisfying the objectives set out in the introduction, but the approaches could be considered a starting point for additional refinement. In particular, GP regression’s ability to generate sample trajectories and credible intervals could prove valuable for those in charge of inventory ordering decisions. Quantified uncertainty can be vastly superior to relying on heuristics.</p>
+
+<p>Finally, the experiments made clear that the data may not contain sufficient information for more exact predictions. Some effort should be expended to encourage the medical system to maintain more expansive records, enabling models to find the best features that drive blood platelet demand.</p>
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="spencerbraun/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/bayesian/machine-learning/python/statistics/projects/tensorflow/2021/07/22/demand-forecasting-with-bayesian-methods.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/spencerbraun" target="_blank" title="spencerbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

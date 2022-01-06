@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Chinese Word Segmentation: Classic and Modern Methods | fastpages</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Chinese Word Segmentation: Classic and Modern Methods" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Working through a common NLP benchmark using classic ML and transformer-based methods" />
+<meta property="og:description" content="Working through a common NLP benchmark using classic ML and transformer-based methods" />
+<link rel="canonical" href="https://spencerbraun.github.io/blog/nlp/machine-learning/projects/pytorch/2021/07/20/chinese-segmentation-classic-and-modern-methods.html" />
+<meta property="og:url" content="https://spencerbraun.github.io/blog/nlp/machine-learning/projects/pytorch/2021/07/20/chinese-segmentation-classic-and-modern-methods.html" />
+<meta property="og:site_name" content="fastpages" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-20T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Chinese Word Segmentation: Classic and Modern Methods" />
+<script type="application/ld+json">
+{"url":"https://spencerbraun.github.io/blog/nlp/machine-learning/projects/pytorch/2021/07/20/chinese-segmentation-classic-and-modern-methods.html","@type":"BlogPosting","headline":"Chinese Word Segmentation: Classic and Modern Methods","dateModified":"2021-07-20T00:00:00-05:00","datePublished":"2021-07-20T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://spencerbraun.github.io/blog/nlp/machine-learning/projects/pytorch/2021/07/20/chinese-segmentation-classic-and-modern-methods.html"},"description":"Working through a common NLP benchmark using classic ML and transformer-based methods","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://spencerbraun.github.io/blog/feed.xml" title="fastpages" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=144357836"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '144357836');
+</script>
+
+
+<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">fastpages</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About Me</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Chinese Word Segmentation: Classic and Modern Methods</h1><p class="page-description">Working through a common NLP benchmark using classic ML and transformer-based methods</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-07-20T00:00:00-05:00" itemprop="datePublished">
+        Jul 20, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      8 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#NLP">NLP</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#machine-learning">machine-learning</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#projects">projects</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#pytorch">pytorch</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Part of the fun of NLP is the diversity of language structures that models must consider. Tools that are built in a monolingual context can easily fail to achieve more global utility. If you just work in English, you may find word embeddings fun and useful, but the German <a href="https://www.dartmouth.edu/~deutsch/Grammatik/Wortbildung/Komposita.html">Komposita</a> don’t fit neatly into our English-centric boxes. Similarly, once we leave the Latin alphabet, we acquire all sorts of new challenges.</p>
+
+<p>Chinese sentences do not typically contain spaces to separate words. From context it may be clear which characters combine to form distinct words, and finding ways to endow this ability to a model is a classic NLP task. I looked to see how well classic machine learning algorithms could learn to accurately segment words and then explored some more modern methods that can also offer a richer set of labels.</p>
+
+<h2 id="binary-classification">Binary Classification</h2>
+
+<p>In <a href="https://arxiv.org/abs/1905.08732">“A realistic and robust model for Chinese word segmentation”</a>, Chu-Ren Huang and co-authors treat segmentation as a binary classification task, predicting whether a word separation exists between two characters or not. This approach has obvious appeal, as it reduces a seemingly complex problem into a simple task.</p>
+
+<p>They examine the efficacy of a number of classifiers, including LDA, logistic regression, SVMs, and feed-forward neural nets. While there are some performance differences among them, the real work involved stems from engineering the features that are input into these models. This is the common refrain for modeling language before deep learning subsumed the field and could easily learn in an end-to-end fashion.</p>
+
+<p>First, we must find adjacent characters for the model to classify, but we likely also want some context since just two characters may not be enough information even for a native speaker. Huang et al. construct 5 features per sample such that for a character string like <code class="language-plaintext highlighter-rouge">[ABCD]</code> we end up with <code class="language-plaintext highlighter-rouge">[AB, B, BC, C, CD]</code>. For maximal data efficiency, we want this for every pair of adjacent characters in the training set. I’m working with a dataset with spaces inserted into sentences to show the true word breaks, so my task is to both featurize and label this dataset. I constructed the samples by passing a sliding 4-character window over each sentence:
+```{python, eval=F}
+def create_samples(sentence: str) -&gt; str:
+        “””
+        Breaks passed sentence into all combinations of 4 adjacent characters
+        using a sliding window over the sentence.
+        Creates label 1 if word break exists in the middle of 4 characters, 0
+        if not.
+        “””</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    split_line = sentence.strip().split("  ")
+    line_breaks = [len(x) for x in split_line]
+    cum_breaks = [sum(line_breaks[0:x]) for x in range(1, len(line_breaks))]
+
+    offset = 0
+    samples = []
+    for idx in range(len(split_line) - 1):
+
+        curr_len = len(split_line[idx])
+        string = "".join(split_line)[offset : offset + curr_len + 3]
+
+        if len(string) &lt; 4:
+            break
+
+        for pos in range(curr_len):
+            sample = string[pos : pos + 4]
+            if len(sample) &lt; 4:
+                break
+
+            label = 1 if (offset + pos + 2) in cum_breaks else 0
+            samples.append((sample, label))
+
+        offset += curr_len
+
+    return samples ```
+</code></pre></div></div>
+
+<p>This system captured all consecutive strings in a sentence, producing 2,638,057 strings with a word break in the center and 1,591,532 strings without a center word break in the training set. While this dataset is somewhat imbalanced, the test set had a very similar balance post-processing. I then split each sample into the 5-feature format
+```{python, eval=F}
+def featurize(sample: Tuple[List[str], int]) -&gt; tuple:
+        “””
+        Given a sample tuple of a 4 character chinese string and a label,
+        (‘ABCD’, 1), returns featurized version of the form
+        ((‘AB’, ‘B’, ‘BC’, ‘C’, ‘CD’), 1)
+        “””
+        chars, label = sample
+        features = (chars[:2], chars[1], chars[1:3], chars[2], chars[2:])</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    return features, label ```
+</code></pre></div></div>
+
+<p>Now we have distinct samples and features, but we still aren’t ready for modeling. An SVM doesn’t place a hyperplane in the space of Chinese characters - we need numbers. In the deep learning space, we would be ready to assign dense word and position embeddings, but here we will turn to one-hot vectors. To construct we follow the steps:</p>
+
+<ul>
+  <li>Each character is assigned an integer index</li>
+  <li>For each feature string in a sample, we take a zero vector of dimension equal to the size of the vocabulary and fill in 1 in the index corresponding to the characters in the string.</li>
+  <li>Concatenate all five vectors from each feature to form a very long, sparse vector for each sample</li>
+</ul>
+
+<p>I played with some additional changes, such as separate indexing of unigrams and bigrams, but the process as outlined is the basic idea. We still have one final data challenge: our vectors are incredibly sparse. Each sample is composed of a vector containing 7 1’s and thousands of 0’s. Here we turn to SciPy’s <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html"><code class="language-plaintext highlighter-rouge">csr_matrix</code></a>, specifically designed to store only the non-zero values of matrix and fully compatible with scikit-learn algorithms.</p>
+
+<h3 id="results">Results</h3>
+
+<p>While I considered many possible modeling techniques, I focused on support vector machines for two reasons. First, the compressed sparse row format of the one-hot encoded matrix offered significant memory and computation speed advantages given an algorithm that could work with this sparsity. Ultimately, discriminative algorithms met this criteria while generative models like LDA required the full dataset to parameterize its Gaussian distributions. Second, SVMs are simple and given their high performance, there was no need to delve into more complex options that could be harder to maintain.</p>
+
+<p>SVMs offer high degrees of flexibility by using the kernel trick to transform the data space and increase class separation. Due to the high dimensionality of the data, classes were likely to be close to separable and empirical testing with non-linear kernels did not improve fit. Data scaling also negatively impacted scores in cross-validation.</p>
+
+<p>On a held out test dataset, the SVM had an accuracy of 97.6% and an F1 score of 98%. This is pretty impressive and reminds us that reaching for simple tools first can save us a lot of time and compute.</p>
+
+<p>I was curious what patterns I could find in the test samples that assigned incorrect labels. Of the 12,137 samples used in the test set, the SVM misclassified 293 of them. For 69 of these samples, the center bigram was not present in the training dataset. This is important since the model was predicting whether a separation exists between these two characters, but each of these bigrams would be assigned the same “unknown” placeholder value under the feature construction process.  This is a general problem of using a fixed vocabulary that a more complex tokenization process could ameliorate.</p>
+
+<h2 id="transformer-architectures">Transformer Architectures</h2>
+
+<p>Turning to more modern methods, I flipped to Sebastian Ruder’s NLP Progress <a href="http://nlpprogress.com/chinese/chinese_word_segmentation.html">leaderboard</a> for Chinese word segmentation. The top scoring paper on the Chinese Treebank 6 is “Towards Fast and Accurate Neural Chinese Word Segmentation with Multi-Criteria Learning” by Weipeng Huang et al. from Ant Group. Their methods combine a Chinese-language BERT model with additional projection layers, knowledge distillation, and quantization. I was more interested in seeing how a Transformer approach to the problem might differ, so I implemented a paired down version of this method.</p>
+
+<p>The Ant Group paper also takes a different labeling approach, seeking to categorize each token as the beginning, middle, end, or single character of words in a sentence. To follow their scheme, the separated words in the training and test sets were concatenated to remove spaces, and each character was given a label in “B”, “M”, “E”, and “S” corresponding to beginning, middle, end, or single respectively.</p>
+
+<p>I loaded a pre-trained BERT Encoder from <a href="https://huggingface.co/bert-base-chinese">Hugging Face</a> and added a dropout and linear layer projecting to the space of possible classes. The labeling tokens were added to the vocabulary and the number of classes easily specified:</p>
+
+<p>```{python, eval=F}
+from transformers import BertTokenizerFast, BertForTokenClassification</p>
+
+<p>tokenizer = BertTokenizerFast.from_pretrained(
+        “bert-base-chinese”, cache_dir=cache_dir
+)
+tokenizer.add_tokens([“A”, “S”, “B”, “M”, “E”])</p>
+
+<p>model = BertForTokenClassification.from_pretrained(
+    “bert-base-chinese”, cache_dir=cache_dir
+)
+model.classifier = torch.nn.Linear(768, 5, bias=True)
+model.num_labels = 5
+```</p>
+
+<p>The model was fine-tuned on the provided segmentation dataset and constructed labels until convergence, as measured by the loss on a small validation set carved out of the training data. The BERT experiments offered many avenues for optimization and only a small subset were attempted for now. The main ablations focused on which parameters were trained; nested versions were run training just the linear classification layer, adding the last three BERT encoder layers, and training all parameters. The results demonstrated that including some encoding layers made a large difference.</p>
+
+<p>I measured the Encoder classification model along two metrics; accuracy is the percent of test samples for which the encoder produced the correct label for every token, while “% Correct Tokens” is the percent of all tokens that received the correct label. My simple BERT implementation scored 74% accuracy and 97% on the “% Correct Tokens” metric. The model showed promising performance on this harder task and would likely benefit from additional ablations. I plan to work on improving training methods, swapping in more modern Encoders than BERT, and adding new projection layers.</p>
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="spencerbraun/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/nlp/machine-learning/projects/pytorch/2021/07/20/chinese-segmentation-classic-and-modern-methods.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/spencerbraun" target="_blank" title="spencerbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
