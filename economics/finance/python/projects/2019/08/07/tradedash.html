@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Yield Curves in Dash | Spencer Braun</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Yield Curves in Dash" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Web app using Dash, Plotly, and Treasury data to get a historical and current look at yield curves and spreads." />
+<meta property="og:description" content="Web app using Dash, Plotly, and Treasury data to get a historical and current look at yield curves and spreads." />
+<link rel="canonical" href="https://spencerbraun.github.io/blog/economics/finance/python/projects/2019/08/07/tradedash.html" />
+<meta property="og:url" content="https://spencerbraun.github.io/blog/economics/finance/python/projects/2019/08/07/tradedash.html" />
+<meta property="og:site_name" content="Spencer Braun" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-08-07T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Yield Curves in Dash" />
+<script type="application/ld+json">
+{"url":"https://spencerbraun.github.io/blog/economics/finance/python/projects/2019/08/07/tradedash.html","headline":"Yield Curves in Dash","datePublished":"2019-08-07T00:00:00-05:00","dateModified":"2019-08-07T00:00:00-05:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://spencerbraun.github.io/blog/economics/finance/python/projects/2019/08/07/tradedash.html"},"description":"Web app using Dash, Plotly, and Treasury data to get a historical and current look at yield curves and spreads.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://spencerbraun.github.io/blog/feed.xml" title="Spencer Braun" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=144357836"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '144357836');
+</script>
+
+
+<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">Spencer Braun</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About Me</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Yield Curves in Dash</h1><p class="page-description">Web app using Dash, Plotly, and Treasury data to get a historical and current look at yield curves and spreads.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2019-08-07T00:00:00-05:00" itemprop="datePublished">
+        Aug 7, 2019
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      3 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#economics">economics</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#finance">finance</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#python">python</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#projects">projects</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h3"><a href="#historical-yields">Historical Yields</a></li>
+<li class="toc-entry toc-h3"><a href="#yield-spreads">Yield Spreads</a></li>
+<li class="toc-entry toc-h3"><a href="#yield-curves">Yield Curves</a></li>
+</ul><p>With a lot of recent focus on the direction of US interest rates and the likelihood of a recession, I thought I would play around with Treasury yield data to construct an easy way to keep an eye on how yield curves are changing. For those unfamiliar, yield curves are simple plots of the yield of a Treasury bill, note, or bond versus the maturities of the securities. The Treasury <a href="https://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/TextView.aspx?data=yield">publishes</a> the market yield for each maturity daily.</p>
+
+<p>Using <a href="https://plot.ly/dash">Dash</a> and Plotly, I created a simple tool to pull in the daily yield data and create some metrics. Feel free to clone from github <a href="https://github.com/spencerbraun/tradedash">here</a>. Below I’ll explain how to use and interpret the metrics displayed.</p>
+
+<h3 id="historical-yields">
+<a class="anchor" href="#historical-yields" aria-hidden="true"><span class="octicon octicon-link"></span></a>Historical Yields</h3>
+
+<p>The first chart simply shows the historical path for yields for each Treasury maturity. Lately while shorter term maturities (say &lt; 1 year) have been relatively flat, longer term maturities have sharply declining yields. The Federal Reserve has more direct control over short-term maturities by setting the target range for the Fed Funds rate and providing guidance through commentary and dot plots. Longer term yields are a reflection of the market’s expectation of future interest rates. As economic data has weakened and the Fed has turned from raising rates to a potential easing cycle, longer term Treasury yields have declined.</p>
+
+<p><img src="/img/tradedash_historical_yields_20190807.png" alt="Historical Yields"></p>
+
+<h3 id="yield-spreads">
+<a class="anchor" href="#yield-spreads" aria-hidden="true"><span class="octicon octicon-link"></span></a>Yield Spreads</h3>
+
+<p>Yield spreads are one place to look when discussions of an yield curve inversions are omnipresent. An inversion occurs when a shorter term Treasury becomes higher yielding than a longer term maturity. What maturity pair determines when the curve is officially inverted? Market participants do not fully agree on this question, so the chart below shows the spreads between yields of three different maturity pairs: 10 years / 2 years, 10 years / 6 months, and 5 years / 2 years. When the spread is below zero, the longer maturity Treasury has a lower yield than the shorter one, meaning that yield spread in inverted. So far the 10yr-2yr spread has not inverted, while the other two have bounced in and out of inversion.</p>
+
+<p><img src="/img/tradedash_yield_spreads_20190807.png" alt="Yield Spreads"></p>
+
+<p>Typically, one might expect long term Treasuries to yield more than shorter term due to a term premium and the expected path of future interest rates. When investors expect the economy to continue to grow steadily, eventually they would expect the Fed to increase interest rates to cool the economy before it overheats. Additionally, investors carry duration risk with longer-term treasuries since they do not know the future path of rates, which typically would command some premium in the yield of an asset. When the yield curve inverts, the market is sending some of these potential signals:
+    - The market expects future interest rates to be below current interest rates due to an economic contraction. The Fed will cut rates in response to deflationary pressures or increasing unemployment, making future interest rates lower than current interest rates.
+    - A coming recession will send investors running from risk assets. Treasuries are the most popular risk-free asset around, so investors will pay more for longer-term Treasuries as a way to protect their principal. More demand pushes up the price of those Treasuries, decreasing their yields.</p>
+
+<h3 id="yield-curves">
+<a class="anchor" href="#yield-curves" aria-hidden="true"><span class="octicon octicon-link"></span></a>Yield Curves</h3>
+
+<p>Finally, the dashboard has a graph of yield curves - every maturity plotted against their yields on a specific date. By plotting the trailing 5 days, we can see how the shape of the yield curve has changed from the recent past. Trade tensions and the recent reduction in the target Fed Funds has sent yields plunging in the last week.</p>
+
+<p><img src="/img/tradedash_yield_curves_20190807.png" alt="Yield Spreads"></p>
+
+<p>Feel free to reach out with comments, questions, or suggestions.</p>
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="spencerbraun/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/economics/finance/python/projects/2019/08/07/tradedash.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>NLP Researcher and Engineer</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/spencerbraun" target="_blank" title="spencerbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://www.linkedin.com/in/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#linkedin"></use></svg></a></li><li><a rel="me" href="https://twitter.com/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

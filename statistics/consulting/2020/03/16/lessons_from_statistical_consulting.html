@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Lessons from Statistical Consulting | Spencer Braun</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Lessons from Statistical Consulting" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="After a quarter of offering my services as a statistical consultant to researchers around Stanford, I began to see patterns I didn’t expect." />
+<meta property="og:description" content="After a quarter of offering my services as a statistical consultant to researchers around Stanford, I began to see patterns I didn’t expect." />
+<link rel="canonical" href="https://spencerbraun.github.io/blog/statistics/consulting/2020/03/16/lessons_from_statistical_consulting.html" />
+<meta property="og:url" content="https://spencerbraun.github.io/blog/statistics/consulting/2020/03/16/lessons_from_statistical_consulting.html" />
+<meta property="og:site_name" content="Spencer Braun" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-03-16T00:00:00-05:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Lessons from Statistical Consulting" />
+<script type="application/ld+json">
+{"url":"https://spencerbraun.github.io/blog/statistics/consulting/2020/03/16/lessons_from_statistical_consulting.html","headline":"Lessons from Statistical Consulting","datePublished":"2020-03-16T00:00:00-05:00","dateModified":"2020-03-16T00:00:00-05:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://spencerbraun.github.io/blog/statistics/consulting/2020/03/16/lessons_from_statistical_consulting.html"},"description":"After a quarter of offering my services as a statistical consultant to researchers around Stanford, I began to see patterns I didn’t expect.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://spencerbraun.github.io/blog/feed.xml" title="Spencer Braun" /><!-- the google_analytics_id gets auto inserted from the config file -->
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=144357836"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '144357836');
+</script>
+
+
+<link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">Spencer Braun</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About Me</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Lessons from Statistical Consulting</h1><p class="page-description">After a quarter of offering my services as a statistical consultant to researchers around Stanford, I began to see patterns I didn't expect.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-03-16T00:00:00-05:00" itemprop="datePublished">
+        Mar 16, 2020
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      5 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#statistics">statistics</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#consulting">consulting</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The Stanford Statistics department offers a unique service; any and all researchers from across the university can come discuss their ideas with Master’s and PhD students. Eager to see whether I could apply my coursework to actual questions of experimental design, inference, and prediction, I signed up to be a consultant for the quarter. The experience was as challenging as I had expected, but the difficulty did not stem from choosing the best model or interpreting p-values. In fact, most cases presented problems that were not actually “statistics questions,” but instead required a conversation about research goals and assumptions.</p>
+
+<p>I spoke with students and professors working in medicine, biology, law, business, political science, and psychology, but they shared quite similar questions and concerns. Certainly some clients came in with difficult queries about experimental design, multi-level modeling, and valid inference (and had me quickly reaching for a textbook before attempting an answer). However, for most clients, I found that I could be much more helpful with a few probing questions instead of simply explaining how to fit a regression. Below I outline the most common misunderstandings and my efforts to work through them.</p>
+
+<p>  </p>
+<h3 id="3-the-streetlight-effect">3. The Streetlight Effect</h3>
+<p> </p>
+
+<p>The old joke goes that the drunkard looks for his missing keys under the streetlight, not because that is where he lost them, but because that’s where the light is. In a similar manner, some researchers start with a dataset and then try to formulate questions that might be answered using only this data. In principle, this may seem like a perfectly fine approach, but so often it leads to a tunnel vision in which one fails to ask whether the questions asked are interesting to the field or whether there are too many confounders and sources of variation outside this dataset to have any confidence in the findings.</p>
+
+<p> </p>
+
+<p>For example, imagine you have found an exciting dataset published by the World Health Organization with some binary indicators describing various countries’ healthcare systems and their rates of heart disease. You might start down the path by thinking a regression could be a great model here, demonstrating how different features of a healthcare system affect actual health outcomes. Yet there are many problems to this  approach. Health outcomes depend on much than the structure of a healthcare system, and by looking across the globe there is no reasonable assumption that you are looking at populations with similar diets, lifestyles, and access to medicines. By looking at a single time period, we cannot perform a causal analysis and may even measure a relationship that works in the opposite causal direction.</p>
+
+<p> </p>
+
+<p>The found dataset may help inspire questions to research, but once those questions are formed the researcher should consider what information would be optimal and whether it may be reasonable to acquire it. They could consider looking for natural experiments to answer causal questions and those that might be most interesting to the subject matter experts they hope would read their work. In the end, these students didn’t need statistics help but instead needed to reconsider their process and design.</p>
+
+<p>  </p>
+
+<h3 id="2-data-without-a-plan">2. Data Without a Plan</h3>
+<p> </p>
+
+<p>“Far better an approximate answer to the <em>right</em> question, which is often vague, than an <em>exact</em> answer to the wrong question, which can always be made precise.”</p>
+
+<p>-John Tukey, <em>The Future of Data Analysis</em></p>
+
+<p> </p>
+
+<p>Thousands of protein levels in hundreds of cultures from 10 mice at 5 time periods. Five CT scans from 100 patients with four randomized treatments. Experiments are a lot of work; they often involve live animals or people and multiple measurements and time periods. If you embark on a study without defining a specific, data-oriented question you seek to answer as well as the statistical method you plan to use, there is a high chance you end up with a mess.</p>
+
+<p> </p>
+
+<p>Let’s say you wish to measure variation across individuals. If you take many observations on a cellular level from 3 mice, you still only have 3 individuals. Your dataset looks large, but if you cannot assume those cell samples are independent from one another, you will have little to say about how variation affect individual outcomes. Alternatively, perhaps you collected the necessary data, but your study design has some features of a repeated measures ANOVA but also uses multi-level modelling and you want to make comparisons within and across levels and time periods. Structuring your study to fit into specific, well-tested models that rely on valid assumptions for your data will make your analysis much easier and your results more convincing.</p>
+
+<p> </p>
+
+<p>It is easy to convince yourself that you have a plan. You have a general question that seems answerable with your current experiment design. Sit down at your computer and try to code your analysis with some simulated data. If you cannot translate your idea into code now, your study design might be in trouble.</p>
+
+<p>  </p>
+
+<h3 id="1-asking-too-much-of-statistics">1. Asking Too Much of Statistics</h3>
+
+<p> </p>
+
+<p>On a good day, statistics can give an answer to the questions “how much?” and “with what certainty?” I say on a good day since we need the assumptions of any model to be at least somewhat valid to get these results, but for now let’s imagine they hold. As a researcher, your paramount objective should be how your work will fit into the current work in your field and how it will add to our understanding.</p>
+
+<p> </p>
+
+<p>You may have a large number of datapoints, perfectly normal, homoskedastic errors, and your regression may have spot on estimates of predictor coefficients. But if what you really needed was a causal model, the statistics won’t help you here. Conversely, if you have a small number of datapoints that show an important effect in your field, don’t let your inability to get a 0.05 p-value stop you from writing a great paper and gathering support to collect more data.</p>
+
+<p> </p>
+
+<p>In the end, statistics is a powerful tool for extrapolation, but it is up to the researcher to match the methods with a reasonable theory, careful research design, and orthoganlize their treatments.</p>
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="spencerbraun/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/statistics/consulting/2020/03/16/lessons_from_statistical_consulting.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>NLP Researcher and Engineer</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/spencerbraun" target="_blank" title="spencerbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://www.linkedin.com/in/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#linkedin"></use></svg></a></li><li><a rel="me" href="https://twitter.com/spencerfbraun" target="_blank" title="spencerfbraun"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
