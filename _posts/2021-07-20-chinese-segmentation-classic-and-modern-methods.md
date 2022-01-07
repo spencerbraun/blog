@@ -20,7 +20,8 @@ In ["A realistic and robust model for Chinese word segmentation"](https://arxiv.
 They examine the efficacy of a number of classifiers, including LDA, logistic regression, SVMs, and feed-forward neural nets. While there are some performance differences among them, the real work involved stems from engineering the features that are input into these models. This is the common refrain for modeling language before deep learning subsumed the field and could easily learn in an end-to-end fashion.
 
 First, we must find adjacent characters for the model to classify, but we likely also want some context since just two characters may not be enough information even for a native speaker. Huang et al. construct 5 features per sample such that for a character string like `[ABCD]` we end up with `[AB, B, BC, C, CD]`. For maximal data efficiency, we want this for every pair of adjacent characters in the training set. I'm working with a dataset with spaces inserted into sentences to show the true word breaks, so my task is to both featurize and label this dataset. I constructed the samples by passing a sliding 4-character window over each sentence:
-```{python, eval=F}
+
+```python
 def create_samples(sentence: str) -> str:
         """
         Breaks passed sentence into all combinations of 4 adjacent characters
@@ -57,7 +58,8 @@ def create_samples(sentence: str) -> str:
 ```
 
 This system captured all consecutive strings in a sentence, producing 2,638,057 strings with a word break in the center and 1,591,532 strings without a center word break in the training set. While this dataset is somewhat imbalanced, the test set had a very similar balance post-processing. I then split each sample into the 5-feature format
-```{python, eval=F}
+
+```python
 def featurize(sample: Tuple[List[str], int]) -> tuple:
         """
         Given a sample tuple of a 4 character chinese string and a label,
@@ -97,7 +99,7 @@ The Ant Group paper also takes a different labeling approach, seeking to categor
 
 I loaded a pre-trained BERT Encoder from [Hugging Face](https://huggingface.co/bert-base-chinese) and added a dropout and linear layer projecting to the space of possible classes. The labeling tokens were added to the vocabulary and the number of classes easily specified:
 
-```{python, eval=F}
+```python
 from transformers import BertTokenizerFast, BertForTokenClassification
 
 tokenizer = BertTokenizerFast.from_pretrained(

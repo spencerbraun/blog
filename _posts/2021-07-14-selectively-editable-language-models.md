@@ -42,42 +42,42 @@ What does this look like in practice? There are some excellent tools available f
 
 In code, the training process looks like:
 
-```{python eval=FALSE}
-    # init an "outer loop" optimizer for the total loss
-    opt = torch.optim.Adam(model.parameters(), lr=1e-5)
+```python
+# init an "outer loop" optimizer for the total loss
+opt = torch.optim.Adam(model.parameters(), lr=1e-5)
 
-    # loop over data batches containing a base objective example and meta-learning task example
-    for train_step, (base_example, meta_example) in enumerate(dataloader):
+# loop over data batches containing a base objective example and meta-learning task example
+for train_step, (base_example, meta_example) in enumerate(dataloader):
 
-        # init an "inner loop" optimizer for meta-learning gradient steps
-        inner_opt = torch.optim.SGD(model.parameters(), lr=1e-3)
+    # init an "inner loop" optimizer for meta-learning gradient steps
+    inner_opt = torch.optim.SGD(model.parameters(), lr=1e-3)
 
-        # higher takes in model and optimizer
-        with higher.innerloop_ctx(
-            model,
-            inner_opt,
-            copy_initial_weights=False, # by not copying weights, we directly alter the model parameters
-            track_higher_grads=True
-            ) as (fmodel, diffopt): #returns functional model and optimizer
+    # higher takes in model and optimizer
+    with higher.innerloop_ctx(
+        model,
+        inner_opt,
+        copy_initial_weights=False, # by not copying weights, we directly alter the model parameters
+        track_higher_grads=True
+        ) as (fmodel, diffopt): #returns functional model and optimizer
 
-            # specify number of gradient steps in meta-learning objective
-            for _ in range(num_grad_steps):
+        # specify number of gradient steps in meta-learning objective
+        for _ in range(num_grad_steps):
 
-                # calculate loss on meta-learning objective
-                loss = fmodel(meta_example).loss
-                # take an optimizer step
-                diffopt.step(loss)
+            # calculate loss on meta-learning objective
+            loss = fmodel(meta_example).loss
+            # take an optimizer step
+            diffopt.step(loss)
 
-            edit_loss = fmodel(meta_example).loss
-            # calculate loss on base objective
-            base_loss = model(base_example).loss
+        edit_loss = fmodel(meta_example).loss
+        # calculate loss on base objective
+        base_loss = model(base_example).loss
 
-            # backprop and optimizer step
-            total_loss = base_loss  + alpha * edit_loss
-            total_loss.backward()
+        # backprop and optimizer step
+        total_loss = base_loss  + alpha * edit_loss
+        total_loss.backward()
 
-            opt.step()
-            opt.zero_grad()
+        opt.step()
+        opt.zero_grad()
 ```
 
 In the snippet above, you can get a sense of how MAML is implemented in practice. For more on MAML and meta-learning, I highly recommend [this excellent blog](https://lilianweng.github.io/lil-log/2018/11/30/meta-learning.html) post by Lillian Weng.

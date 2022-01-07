@@ -23,36 +23,46 @@ While the data cannot be made publicly available, there are a few key features t
 
 In a typical Bayesian regression problem, we have a setting with independent and identically distributed training data with future observations drawn from the same population. In this case we can simply place a prior over the weights and variance, evaluate the data likelihood and find the posterior through exact or approximate inference to determine a stable model from which we can make predictions. Here we are presented with a time series of features and inventory data and want our model to flexibly model trends that depend on our time step. Online regression is a naive baseline for this problem in which at time step t, we take the posterior from time step t − 1 as our prior and update the model using only the likelihood over the most recent batch of data. Define our original priors as $p(\theta_0)$, then our model updates occur sequentially:
 
-
+$$
 \begin{align*}
     p(\theta_{t}) = p(\theta_{t} \mid y_{t-1}, x_{t-1},\theta_{t-1}) &\propto p( y_{t-1}\mid x_{t-1},\theta_{t-1})p(\theta_{t-1})\\
     p(\theta_{t+1} \mid y_{t}, x_{t},\theta_{t}) &\propto p( y_{t}\mid x_{t},\theta_{t})p(\theta_{t})
 \end{align*}
-
+$$
 
 While a simple regression may seem underpowered for this task, it provides an excellent baseline against which we can compare more complex approaches. The conjugacy of the Gaussian model makes it extremely efficient as we add new data points with easy interpretation. However, its failure to model dependency between data points may introduce bias that could be avoided with more complex approaches.
 
 The model as implemented closely follows the approach outlined in Christopher Bishop's [Pattern Recognition and Machine Learning](https://www.amazon.com/Pattern-Recognition-Learning-Information-Statistics/dp/0387310738). Given model $y_i = w_ix_i^T + \varepsilon_i$, we give likelihood and prior distributions as $p\left(y_{i} \mid x_{i}, w_{i}\right)=\mathcal{N}\left(w_{i} x_{i}^{\top}, \beta^{-1}\right)$ and $p\left(w_{0}\right)=\mathcal{N}\left(m_{0}, S_{0}\right)$ respectively, where $\beta$ is a precision hyperparameter, $m_0 = \mathbf{0}$ and $S_0 = diag(\alpha^{-1})$ for hyperparameter $\alpha$. Our posterior is analytically derived as
+
+$$
 \begin{align*}
     p\left(w_{i+1} \mid w_{i}, x_{i}, y_{i}\right)=\mathcal{N}\left(m_{i+1}, S_{i+1}\right)\\
     S_{i+1}=\left(S_{i}^{-1}+\beta x_{i}^{\top} x_{i}\right)^{-1}\\ m_{i+1}=S_{i+1}\left(S_{i}^{-1} m_{i}+\beta x_{i} y_{i}\right)
 \end{align*}
+$$
 
 For model criticism, Bishop recommends evaluating the marginal likelihood, or model evidence, which he derives analytically. For M features and N observations, the log marginal likelihood can be expressed as
+
+$$
 \begin{align*}
     \log p({y} \mid \alpha, \beta)=\frac{M}{2} \log \alpha+\frac{N}{2} \log \beta-E\left({m}_{N}\right)-\frac{1}{2} \log \left|{S}_{N}^{-1}\right|-\frac{N}{2} \log 2 \pi
 \end{align*}
+$$
+
 Therefore we can directly use this expression to select for optimal hyperparameters $\alpha,\beta$ to improve the model fit.
 
 
 ### Gaussian Processes Regression
 
 I look to Gaussian processes (GP) regression to correct for the deficiencies of the regression model. While the prior model considered datapoints to be independently drawn from a stationary distribution, Gaussian processes explicitly model the covariance relations between time steps. Here we consider our feature vectors $x \in R^d$ over T time steps $x_1,...,x_T$ and each observation of inventory used $y_i = f(x_i)$. If we assume the functions $f$ to be given by a prior Gaussian process $f \sim GP(\mu, K)$ for some mean $\mu$ and covariance matrix $K$ and $y_i \sim N(f(x_i), \sigma^2)$ then we obtain posterior $p\left({f} \mid x_{n}, y_{n}\right) \propto {N}\left({f} \mid {\mu}^{\prime}, {K}^{\prime}\right)$ for ${K}^{\prime}=\left({K}^{-1}+\sigma^{-2} {I}\right)^{-1}, \; {\mu}^{\prime}={K}^{\prime}\left({K}^{-1} {\mu}+\sigma^{-2} {y}\right)$. Similarly, we can obtain an exact posterior predictive distribution given by
+
+$$
 \begin{align*}
     y_{T+1} | x_{T+1}, x_i, y_i &\sim N(m_{T+1}, v_{T+1}) \\
     m_{N+1} &=\mu\left({x}_{N+1}\right)+{k}^{\top}\left({K}+\sigma^{2} {I}\right)^{-1}({y}-{\mu}) \\
     v_{N+1} &=K\left({x}_{N+1}, {x}_{N+1}\right)-{k}^{\top}\left({K}+\sigma^{2} {I}\right)^{-1} {k}+\sigma^{2}
 \end{align*}
+$$
 
 GP regression offers additional modeling decisions that improve its attractiveness for our use case. First, there are a variety of potential kernels for expressing the relationship between feature vectors over time. Our choice determines how closely we model regular periodicity and linear trends in the data.
 
@@ -62,12 +72,13 @@ Additionally, since GP regression is closely related to time series methods like
 
 Over the experiments run, the simple online regression obtained the lowest mean absolute error across 1, 3, and 7 day prediction intervals. This result is somewhat surprising given the difference between the modeling assumptions (eg. independence) and the true data generating process but can be reconciled when we consider that we limited GP regression's performance by limiting the features used in fitting. While online regression achieved the best results under the evaluation metric, GP regression may still be preferable in a practical setting. Comparing the mean absolute error among the methods explored:
 
+$$
 \begin{array}{l|cccc}
     Model & MAE\, 1\, Day & MAE\, 3 \,Day & MAE\, 7 \,Day\\
     Online Regression & 6.40 & 6.65 & 6.58 \\
     GP Regression & 7.33 & 7.80 & 7.89
 \end{array}
-
+$$
 
 ### Online Regression
 
