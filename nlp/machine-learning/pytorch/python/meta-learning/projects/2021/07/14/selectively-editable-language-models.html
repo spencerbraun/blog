@@ -110,7 +110,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      9 min read
+      8 min read
     
 </span></p>
 
@@ -182,42 +182,41 @@ window.onload = wrap_img;
 
 <p>In code, the training process looks like:</p>
 
-<p>```{python eval=FALSE}
-    # init an “outer loop” optimizer for the total loss
-    opt = torch.optim.Adam(model.parameters(), lr=1e-5)</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># init an "outer loop" optimizer for the total loss
+</span><span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># loop over data batches containing a base objective example and meta-learning task example
-for train_step, (base_example, meta_example) in enumerate(dataloader):
+<span class="c1"># loop over data batches containing a base objective example and meta-learning task example
+</span><span class="k">for</span> <span class="n">train_step</span><span class="p">,</span> <span class="p">(</span><span class="n">base_example</span><span class="p">,</span> <span class="n">meta_example</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataloader</span><span class="p">):</span>
 
-    # init an "inner loop" optimizer for meta-learning gradient steps
-    inner_opt = torch.optim.SGD(model.parameters(), lr=1e-3)
+    <span class="c1"># init an "inner loop" optimizer for meta-learning gradient steps
+</span>    <span class="n">inner_opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
 
-    # higher takes in model and optimizer
-    with higher.innerloop_ctx(
-        model,
-        inner_opt,
-        copy_initial_weights=False, # by not copying weights, we directly alter the model parameters
-        track_higher_grads=True
-        ) as (fmodel, diffopt): #returns functional model and optimizer
+    <span class="c1"># higher takes in model and optimizer
+</span>    <span class="k">with</span> <span class="n">higher</span><span class="p">.</span><span class="n">innerloop_ctx</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">inner_opt</span><span class="p">,</span>
+        <span class="n">copy_initial_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="c1"># by not copying weights, we directly alter the model parameters
+</span>        <span class="n">track_higher_grads</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">fmodel</span><span class="p">,</span> <span class="n">diffopt</span><span class="p">):</span> <span class="c1">#returns functional model and optimizer
+</span>
+        <span class="c1"># specify number of gradient steps in meta-learning objective
+</span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_grad_steps</span><span class="p">):</span>
 
-        # specify number of gradient steps in meta-learning objective
-        for _ in range(num_grad_steps):
+            <span class="c1"># calculate loss on meta-learning objective
+</span>            <span class="n">loss</span> <span class="o">=</span> <span class="n">fmodel</span><span class="p">(</span><span class="n">meta_example</span><span class="p">).</span><span class="n">loss</span>
+            <span class="c1"># take an optimizer step
+</span>            <span class="n">diffopt</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
 
-            # calculate loss on meta-learning objective
-            loss = fmodel(meta_example).loss
-            # take an optimizer step
-            diffopt.step(loss)
+        <span class="n">edit_loss</span> <span class="o">=</span> <span class="n">fmodel</span><span class="p">(</span><span class="n">meta_example</span><span class="p">).</span><span class="n">loss</span>
+        <span class="c1"># calculate loss on base objective
+</span>        <span class="n">base_loss</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">base_example</span><span class="p">).</span><span class="n">loss</span>
 
-        edit_loss = fmodel(meta_example).loss
-        # calculate loss on base objective
-        base_loss = model(base_example).loss
+        <span class="c1"># backprop and optimizer step
+</span>        <span class="n">total_loss</span> <span class="o">=</span> <span class="n">base_loss</span>  <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">edit_loss</span>
+        <span class="n">total_loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
 
-        # backprop and optimizer step
-        total_loss = base_loss  + alpha * edit_loss
-        total_loss.backward()
-
-        opt.step()
-        opt.zero_grad() ```
+        <span class="n">opt</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">opt</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p>In the snippet above, you can get a sense of how MAML is implemented in practice. For more on MAML and meta-learning, I highly recommend <a href="https://lilianweng.github.io/lil-log/2018/11/30/meta-learning.html">this excellent blog</a> post by Lillian Weng.</p>
